@@ -2,7 +2,7 @@
 
 ---
 
-언제, 어디서, 무엇을 하든 지각하지 않게 도와주는 서비스 \`프로젝트 오디\`에서는
+언제, 어디서, 무엇을 하든 지각하지 않게 도와주는 서비스 `프로젝트 오디`에서는
 3차 스프린트 목표로 **실시간 친구 도착 여부를 알 수 있는 기능**을 핵심 기능으로 삼았다.
 
 ![img.png](imgs/img.png)
@@ -22,15 +22,17 @@
 
 우선 제한 사항을 살펴보자
 
-> \- API 사용량 : 대중교통 정보가 반영된 소요시간 측정은 일 1000건으로 한정되어 있다  
-> \- 위치 공유 허용 여부 : 기기 사용자가 위치정보 공유에 동의하지 않을 수 있다  
-> \- 화면 동기화 : 약속 참여자들이 동시에 같은 도착 예정 정보를 보아야 한다.
+> - API 사용량 : 대중교통 정보가 반영된 소요시간 측정은 일 1000건으로 한정되어 있다  
+> - 위치 공유 허용 여부 : 기기 사용자가 위치정보 공유에 동의하지 않을 수 있다  
+> - 화면 동기화 : 약속 참여자들이 동시에 같은 도착 예정 정보를 보아야 한다.
 
 이 3가지 제한 사항을 고려해 몇가지 서비스 정책과 큰 구현 흐름이 정해졌다.
 
-#### **1) 폴링 활용**
+---
 
-\- 약속 정보 화면 동기화를 위해 **약속 30분 전부터 10초 간격으로 도착 정보를 요청하는 폴링**이 시작된다 
+### **1) 폴링 활용**
+
+- 약속 정보 화면 동기화를 위해 **약속 30분 전부터 10초 간격으로 도착 정보를 요청하는 폴링**이 시작된다 
 
 ![img_1.png](imgs/img_1.png)
 
@@ -44,7 +46,7 @@
 
 ---
 
-#### **2) 도착 예정 시간 측정**
+### **2) 도착 예정 시간 측정**
 
 ![img_3.png](imgs/img_3.png)
 - API 호출 건수 절약을 위해 **10분 간격으로 현재 위치로부터 약속 장소까지의 대중교통 소요시간을 갱신**한다
@@ -56,7 +58,9 @@
 
 ex) 2분전에 갱신된 소요시간이 10분이라면 8분이 남았다고 반환한다.
 
-#### **3) 도착 기준** 
+---
+
+### **3) 도착 기준**
 
 ![img_4.png](imgs/img_4.png)
 
@@ -64,25 +68,20 @@ ex) 2분전에 갱신된 소요시간이 10분이라면 8분이 남았다고 반
 
 ---
 
-#### **4) 상태 정의**
+### **4) 도착예정정보(ETA) 상태 정의**
 
 **4-1) 약속 시간 전**
 
-\- 지각 위기 : 약속 시간 내에 도착할 수 없는 상태
-
-\- 도착 예정 : 약속 시간 내에 도착가능한 상태
-
-\- 도착 : 약속 장소 반경 300m 이내로 들어온 상태
-
-\- 행방불명 : 위치 정보를 허용하지 않은 상태
+- 지각 위기 : 약속 시간 내에 도착할 수 없는 상태
+- 도착 예정 : 약속 시간 내에 도착가능한 상태
+- 도착 : 약속 장소 반경 300m 이내로 들어온 상태
+- 행방불명 : 위치 정보를 허용하지 않은 상태
 
 **4-2) 약속 시간 후**
 
-\- 지각 : 약속 장소에 도착하지 않은 상태
-
-\- 도착 : 약속 장소 반경 300m 이내로 들어온 상태
-
-\- 행방불명 : 위치 정보를 허용하지 않은 상태
+- 지각 : 약속 장소에 도착하지 않은 상태
+- 도착 : 약속 장소 반경 300m 이내로 들어온 상태
+- 행방불명 : 위치 정보를 허용하지 않은 상태
 
 ---
 
@@ -92,20 +91,14 @@ ex) 2분전에 갱신된 소요시간이 10분이라면 8분이 남았다고 반
 
 ![img_5.png](imgs/img_5.png)
 
-Meeting : 약속
+- Meeting : 약속
+- Mate : 약속에 참여하는 모임원
+- ETA : 약속 모임원의 도착 예정 정보
+- Member : 회원 정보
 
-Mate : 약속에 참여하는 모임원
-
-ETA : 약속 모임원의 도착 예정 정보
-
-Member : 회원 정보
-
-이를 반영한 프로젝트의 ERD는 다음과 같다.
-
-![img_6.png](imgs/img_6.png)
 ---
 
-#### **2-1) API 확정하기**
+## **2-1) API 확정하기**
 
 먼저 안드로이드 측과 협의하여 API를 확정하였다
 
@@ -187,16 +180,6 @@ Member : 회원 정보
 			"status": "ARRIVED"
 			"durationMinutes": 0
 		},
-		{
-			"nickname": "해음",
-			"status": "ARRIVED"
-			"durationMinutes": 0
-		},
-		{
-			"nickname": "카키공주",
-			"status": "MISSING"
-			"durationMinutes": -1
-		}
 	]
 }
 ```
@@ -205,7 +188,7 @@ Member : 회원 정보
 
 ---
 
-#### **2-2) 로직 구현하기**
+## **2-2) 로직 구현하기**
 
 먼저 코드 작성에 들어가기 전에 상태 판단 알고리즘의 전반적인 흐름을 화이트보드에 쭉 정리해보았다.
 
@@ -219,7 +202,7 @@ Member : 회원 정보
 
 ---
 
-**1) 하위 모듈 만들기 : DistanceCalculator**
+### **1) 하위 모듈 만들기 : DistanceCalculator**
 
 먼저 두 위 경도 좌표 간에 직선 거리를 계산하는 DistanceCalculator를 만들었다.
 
@@ -235,8 +218,9 @@ public class DistanceCalculator {
         ...// 하버사인 공식을 활용하여 직선 거리 계산
     }
 ```
+---
 
-2**) 도착 예정정보 판단 로직 작성하기**
+### **2) 도착 예정정보 판단 로직 작성하기**
 
 다음으로 EtaStatus를 상황에 따라 반환하는 로직을 작성해주었다.
 
@@ -282,7 +266,9 @@ public enum EtaStatus {
 }
 ```
 
-**3) 서비스 정책에 따른 조건식을 private method로 만들어주기**
+---
+
+### **3) 서비스 정책에 따른 조건식을 private method로 만들어주기**
 
 **\-- 도착 정보를 판단하는 로직 : 위경도 직선거리가 300m이내 + 약속시간 전이라면 => 도착**
 
@@ -309,9 +295,11 @@ public enum EtaStatus {
     }
 ```
 
-**4) EtaService 구현하기**
+---
 
-위에서 구현한 내용을 합쳐  service 단에서 로직을 모두 드러나게 나열하는 식으로 우선 코드를 짰다.
+### **4) EtaService 구현하기**
+
+위에서 구현한 내용을 합쳐 service 단에서 로직을 모두 드러나게 나열하는 식으로 우선 코드를 짰다.
 
 (지금 보아도 부끄러운 코드다....)
 
@@ -349,25 +337,22 @@ public enum EtaStatus {
 
 ---
 
-#### **2-3) 무엇이 불편했을까?**
+## **2-3) 무엇이 불편했을까?**
 
-**첫째, 중복 코드가 많았다.** 
+### **첫째, 중복 코드가 많았다.**
 
-\- 시간 선후관계 판단에서 나노초를 제거하는 코드 : withNano(0)
+- 시간 선후관계 판단에서 나노초를 제거하는 코드 : withNano(0)
+- 약속 시간이 지났는지 판단하는 코드 : (now.isBefore(meetingTime) || now.isEqual(meetingTime)); 
 
-\- 약속 시간이 지났는지 판단하는 코드 : (now.isBefore(meetingTime) || now.isEqual(meetingTime));
+### **둘째, 메서드 하나에 너무 많은 책임이 들어있었다**
 
-**둘째, 메서드 하나에 너무 많은 책임이 들어있었다**
+- 메서드 1개가 10줄이 넘었다.
+- Eta를 매핑할 때(Eta.from), 파라미터가 4개에 달했다. 
+- findAllMateEtas라는 메서드 명은 단지 쿼리형 메서드의 느낌을 준다. 실제로는 eta의 상태가 변경된다. 
 
-\- 메서드 1개가 10줄이 넘었다.
+### **셋째, 시키지 않고 물어보는 코드가 많았다.**
 
-\- Eta를 매핑할 때(Eta.from), 파라미터가 4개에 달했다. 
-
-\- findAllMateEtas라는 메서드 명은 단지 쿼리형 메서드의 느낌을 준다. 실제로는 eta의 상태가 변경된다. 
-
-**셋째, 시키지 않고 물어보는 코드가 많았다.**
-
-```
+```java
     @Transactional
     public MateEtaResponses findAllMateEtas(MateEtaRequest mateEtaRequest, Long meetingId, Member member) {
         //먼저 위치를 보내준 약속 참여원을 가져온다
@@ -379,21 +364,20 @@ public enum EtaStatus {
         .....
 ```
 
-\- **묻지말고 시켜라! 원칙에 어긋나는 코드**가 많았다.
-
-\- 절차지향적으로 필요한 데이터를 메서드 초반에 나열하고, 이를 활용하는 식으로 로직을 짰다
+- **묻지말고 시켜라! 원칙에 어긋나는 코드**가 많았다.
+- 절차지향적으로 필요한 데이터를 메서드 초반에 나열하고, 이를 활용하는 식으로 로직을 짰다
 
 ---
 
-## **3\. 리팩터링 하기**
+# **3. 리팩터링 하기**
 
 결과적으로 마감기한에 쫓겨 OOP 스럽지 못한 코드를 짜내었다. 그래서 페어인 카키에게 리팩터링을 제안했고 너무나 고맙게도 11시 이후에 새벽까지 24시간 카페에 가서 몇 시간 더 리팩터링을 함께 할 수 있었다.
 
-#### **리팩터링1. 중복 코드 > 객체에게 책임 부여**
+## **리팩터링1. 중복 코드 > 객체에게 책임 부여**
 
 중복되는 로직을 객체가 처리할 수 있도록 크로스 커팅해주었다.
 
-**\- 중복코드1 : 시간 선후관계 판단에서 나노초를 제거하는 코드 : withNano(0)**
+### **\- 중복코드1 : 시간 선후관계 판단에서 나노초를 제거하는 코드 : withNano(0)**
 
 TimeUtil 객체를 만들어 나노초 trim 작업을 담당하게 하였다.
 
@@ -407,7 +391,9 @@ public class TimeUtil {
 }
 ```
 
-**\- 중복 코드2 : 약속 시간이 지났는지 판단하는 코드 : (now.isBefore(meetingTime) || now.isEqual(meetingTime));**
+---
+
+### **\- 중복 코드2 : 약속 시간이 지났는지 판단하는 코드 : (now.isBefore(meetingTime) || now.isEqual(meetingTime));**
 
 meeting에게 약속이 끝났는지 물어보게 하였다
 
@@ -475,7 +461,7 @@ public enum EtaStatus {
 
 ---
 
-#### **리팩터링2. 두꺼운 메서드 > 메서드 분리**
+## **리팩터링2. 두꺼운 메서드 > 메서드 분리**
 
 **순서도를 보면 흐름이 크게 2가지로 나뉘었다.**
 
@@ -509,7 +495,7 @@ public enum EtaStatus {
 
 ---
 
-## **4\. 안드로이드의 스케쥴링 오버 문제**
+# **4\. 안드로이드의 스케쥴링 오버 문제**
 
 데모데이 날 테스트를 위해 몇 가지 약속을 만들던 중 약속이 많아지면 ETA 상태 api를 안드로이드가 호출하지 않는 문제를 발견했다. 
 
@@ -524,13 +510,13 @@ public enum EtaStatus {
 
 ---
 
-## **5\. 웹 소켓으로의 전환**
+# **5\. 웹 소켓으로의 전환**
 
 문제의 원인은 안드로이드가 과도한 스케쥴링 부담을 질 수 없다는 것이었다. 그럼 해결책은?
 
-> \- 1. 업데이트 간격인 10초를 더 늘려서 부담을 줄인다.  
-> \- 2. 안드로이드가 한번에 180개가 아니라 동적으로 스케쥴링을 하도록 로직을 고친다  
-> \- 3. 스케쥴링 부담을 서버로 이전한다.
+> - 1. 업데이트 간격인 10초를 더 늘려서 부담을 줄인다.  
+> - 2. 안드로이드가 한번에 180개가 아니라 동적으로 스케쥴링을 하도록 로직을 고친다  
+> - 3. 스케쥴링 부담을 서버로 이전한다.
 
 첫번째 대안은 유저 경험 상 10초 이상의 간격이 부자연스러울 것 같다는 데 의견이 맞추어졌다.
 
@@ -542,12 +528,16 @@ public enum EtaStatus {
 
 그럼 어떤 사고과정을 통해 웹 소켓이라는 해결책을 떠올렸는지 바라보자
 
-#### **5-1) 웹 소켓이 왜 HTTP의 단점을 극복할 수 있는가?**
+---
+
+## **5-1) 웹 소켓이 왜 HTTP의 단점을 극복할 수 있는가?**
 
 ![img_20.png](imgs/img_20.png)
+
 앞선 polling 방식의 통신에서는 요청에 대한 책임을 온전히 client가 지고 있었다. 따라서 server는 단순히 요청에 응답을 하는 주체로서의 역할만을 담당했다. 이는 요청이 오지 않으면 서버가 할 수 있는 일은 아무것도 없다는 걸 의미한다.
 
 그러나 웹소켓은 **양방향 통신이 가능**하다
+
 ![img_19.png](imgs/img_19.png)
 
 
@@ -555,13 +545,14 @@ public enum EtaStatus {
 
 ---
 
-#### **5-2) STOMP 도입 결정**
+## **5-2) STOMP 도입 결정**
 
 이렇게 웹 소켓을 도입하기로 결정하고 페어인 조조와 협의하던 중 메시지 전송에 특화되어 있는 STOMP가 웹소켓 + SpringBoot 환경일 때 굉장히 강력하다는 사실을 알게 되었다.
 
 이번 글에서는 Stomp의 자세한 내용보다 문제를 해결해 나아가는 과정을 이해할 정도의 간단한 지식들만 서술해보려 한다.
 
-#### **1) Stomp는 Frame 기반으로 소통한다.**
+
+### **1) Stomp는 Frame 기반으로 소통한다.**
 
 RFC2616을 기반으로 Http의 통신에서 주고받는 데이터를 살펴보면 대게 다음과 같다.
 
@@ -569,7 +560,7 @@ RFC2616을 기반으로 Http의 통신에서 주고받는 데이터를 살펴보
 
 Stomp도 Http를 기반으로 모델링되었기 때문에 비슷한 데이터 형식을 주고 받는다. 그러나, Http에 있는 모든 정보를 주고 받기에는 너무 무거워 **Frame이라는 단위로 소통**하게 된다.
 
-Fame은 이렇게 생겼다.
+Frame은 이렇게 생겼다.
 
 > COMMAND  
 > header1:value1  
@@ -583,7 +574,10 @@ Fame은 이렇게 생겼다.
 
 이외의 메시지는 body에 담아 보내준다.
 
-#### **2) Stomp는 Pub/Sub 구조를 기반으로 한 메시지 소통이 가능하다**
+---
+
+
+### **2) Stomp는 Pub/Sub 구조를 기반으로 한 메시지 소통이 가능하다**
 
 Pub/Sub 구조는 우리가 유투브에서 보는 구조 그 자체이다.
 
@@ -604,7 +598,9 @@ Publisher2를 구독한 Subscriber2와 Subscriber3는 CCOLI라는 메시지를 �
 
 STOMP가 WebSocket을 기반으로 함께 운용될 때 강력한 이유는 위의 Pub/Sub 구조와도 연관이 있다. BroadCasting 과정에서 구독을 한 Subscriber는 본인들이 요청을 하지 않았음에도 Message를 전달받게 된다. 즉 양방향 통신의 이점을 잘 살려 실시간 정보 교환을 보장하는 구조이다.
 
-#### **3) Stomp는 Spring Boot의 Controller를 endpoint로 로직 설계가 가능하다**
+---
+
+### **3) Stomp는 Spring Boot의 Controller를 endpoint로 로직 설계가 가능하다**
 
 Stomp를 Spring Boot와 함께 쓰면 좋은 점은 기존 controller의 구조를 거의 그대로 유지하면서 메시지 처리 로직을 수행할 수 있기 때문이다.
 
@@ -625,7 +621,9 @@ Stomp를 Spring Boot와 함께 쓰면 좋은 점은 기존 controller의 구조�
 
 공식문서를 기반으로 따라가보면 
 
-\- 먼저 기존 messagehandler와 우리가 정의한 messagehandler를 나눌 endpoint를 설정한다.
+---
+
+### **\- 먼저 기존 messagehandler를 결정할 endpoint를 설정한다.**
 
 ```
 @Configuration
@@ -647,6 +645,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 여기서 enalbeSimpleBroker에 설정한 "/topic", 과 "/queue" 의 경우 구독이나 브로드 캐스팅 처럼 기존 simplebroker에게 바로 위임한다. 그와 달리 /app으로 시작되는 요청의 경우 @Controller 클래스에 @MessageMapping을 통해 구현한 MessageHandler를 통해 우리가 정의한 로직을 선수적으로 처리하도록 한다.
 
+---
+
+### **\- message 가공이 필요하다면 해당 endpoint를 매핑할 controller를 만든다.**
+
 ```
 @Controller
 public class GreetingController {
@@ -659,6 +661,10 @@ public class GreetingController {
 ```
 
 예를 들어 위와 같이 GreetingController가 정의되어 있다면 /app/greeting에 해당하는 요청에 대하 GreetingController의 handle을 endpoint로 message를 매핑할 수 있도록 한다.
+
+---
+
+### **\- message를 전달할 목적지를 정한다.**
 
 그럼 메시지를 보내는 것은 어떻게 할까? @SendToUser를 통해 요청을 준 user session을 대상으로 하거나, @SendTo를 통해 특정 주제를 대상으로 broadcast 하는 것이 가능하다
 
@@ -682,4 +688,134 @@ public class GreetingController {
 
 **\- @SendToUser(destination) : 요청을 보낸 user에게 응답**
 
-위와 같은 controller에서 handle은 /app/greeting 이란 요청이 들어오면 타임스탬프에 대한 메시지를 /queue/greeting을 통해 요청을 보낸 user를 특정하여 메시지를 보낸다. broadcast 옵션을 켜면 /queue/greeting 이란 주제를 구독한 모든 user들에게 같은 메시지를 보낼 수 있다.
+위의 controller에서 handle은 /app/greeting 이란 요청이 들어오면 타임스탬프에 대한 메시지를 /queue/greeting을 통해 요청을 보낸 user를 특정하여 메시지를 보낸다. broadcast 옵션을 켜면 /queue/greeting 이란 주제를 구독한 모든 user들에게 같은 메시지를 보낼 수 있다.
+
+**\- @SendTo(topic) : 구독자들에게 broadcast**
+
+위와 같은 controller에서 handle2은 /app/greeting2 란 요청이 들어오면 타임스탬프에 대한 메시지를 topic/greeting2를 구독한 모든 user들에게 발송한다.
+
+---
+
+## **5-3) 웹 소켓 로직 생각하기**
+
+그럼 10초마다 서로의 위치정보를 갱신했던 폴링을 어떤 로직을 통해 웹소켓으로 전환할 수 있을까?
+
+![img_5.png](imgs/img_41.png)
+
+### **step1. 주제 구독**
+
+웹소켓 전환 후 클라이언트 측에서 3가지 토픽에 주제를 구독한다
+
+실시간 약속 구성원들의 위치정보를 받을 채널 : /topic/etas/{meetingId}
+
+서버가 위치 정보를 요구할 트리거 채널 : /topic/coordinates/{meetingId}
+
+서버가 연결 종료를 요구할 트리거 채널 : /topic/disconnect/{meetingId}
+
+이 토픽들은 약속 모임원 모두가 하나의 채널을 구독하게 된다.
+
+---
+
+### **step2. 30분간 양방향 통신**
+
+\- 먼저 서버가 클라이언트에게 위치정보를 달라고 요구한다
+
+![img_4.png](imgs/img_40.png)
+
+\- 클라이언트는 서버의 요청을 받아 각 디바이스의 좌표를 보내준다
+
+![img_3.png](imgs/img_39.png)
+
+\- 서버는 위치정보를 기반으로 ETA목록을 갱신하여 반환하고 10초 뒤 같은 작업을 서버가 스케쥴링 한다.
+
+![img_2.png](imgs/img_38.png)
+
+자세히 보면 요청을 서버가 먼저 하여 클라이언트는 이벤트 리스터 형식의 트리거만 만들어두면 되는 형태로 로직이 바뀌었다. 스케쥴링에 대한 부담도 서버가 가져올 수 있도록 변화되었다.
+
+---
+
+### **step3. 연결 종료**
+
+\- 약속 시간이 지났다면 서버가 소켓 통신의 종료를 약속 모임원들에게 /topic/disconnect/{meetingId} 채널을 통해 알린다.
+
+![img_1.png](imgs/img_37.png)
+
+\- 클라이언트는 전달받은 disconnect 요청에 따라 disconnect로 소켓 통신을 종료한다.
+
+![img.png](imgs/img_36.png)
+
+---
+
+## **5-4) 웹 소켓 로직 구현하기**
+
+위의 로직을 옮기면 다음과 같은 EtaSocketController가 완성된다.
+
+```
+@Slf4j
+@RestController
+@RequiredArgsConstructor
+public class EtaSocketController {
+
+    private final EtaSocketService etaSocketService;
+
+    @MessageMapping("/open/{meetingId}")
+    public void open(@DestinationVariable Long meetingId) {
+        log.info("--- websocket open ! - {}", meetingId);
+        etaSocketService.open(meetingId);
+    }
+
+    @MessageMapping("/etas/{meetingId}") // /publish/etas/{meetingId}로 오는 요청은 여기로 매핑해줘!
+    @SendTo("/topic/etas/{meetingId}") // /topic/etas/{meetingId} 구독자들에게 eta 정보를 발송해줘
+    public MateEtaResponsesV2 etaUpdate(
+            @DestinationVariable Long meetingId,
+            @WebSocketAuthMember Member member,
+            @Payload MateEtaRequest etaRequest
+    ) {
+        log.info("--- etaUpdate 호출 ! - {}, {}, {}", meetingId, member, etaRequest);
+        return etaSocketService.etaUpdate(meetingId, member, etaRequest);
+    }
+}
+```
+
+그럼 10초 뒤에 같은 etaUpdate를 반복하는 스케쥴링 작업은 어떤 방식으로 서버가 가져오게 되었을까?
+
+EtaSocketService의 etaUpdate 메서드를 보면 알 수 있다.
+
+```
+public class EtaSocketService {
+
+    .... 중략 ...
+    
+    public synchronized MateEtaResponsesV2 etaUpdate(Long meetingId, Member member, MateEtaRequest etaRequest) {
+        
+        // 약속이 지났는지 확인 -> 지났다면 disconnect 트리거 당기기
+        if (isOverMeetingTime(meetingId)) {
+            socketMessageSender.sendMessage(WebSocketTrigger.DISCONNECT.trigger(meetingId));
+        } 
+        
+        // 스케쥴링 해야 하는가? -> 10초 뒤 coordinates 채널로 위치달라고 하기
+        if (isTimeToSchedule(meetingId)) {
+            reserveLocationTrigger(meetingId, LOCATION_TRIGGER_CALL_MINUTE_GAP);
+        }
+        
+        // 위치정보 업데이트 하여 반환
+        return mateService.findAllMateEtas(etaRequest, meetingId, member);
+    }
+}
+```
+
+약속이 지났다면 소켓 종료 트리거를 당긴다.
+
+약속이 종료되지 않고 10초 뒤에 예약을 해야하는 상황이라면 10초 뒤에 좌표를 달라는 요청을 예약한다.
+
+현재 받은 정보를 바탕으로 위치정보를 업데이트하여 반환한다.
+
+즉, 위에 이야기했던 **안드로이드 측의 예약 부담을 서버측에서 가져옴으로써** 문제를 해결할 수 있게 되었다.
+
+---
+
+## **6\. 느낀 점**
+
+처음 로직을 구현하기부터 리팩터링부터 더 나은 구조를 실현하기 까지 내가 휴대폰에서 누리는 하나의 기능이 안정적으로 작동하려면 엄청난 노력이 들어간다는 사실을 직접 체감했다.
+
+직접 하나의 기능을 맡아 책임감있게 기능을 안정화하는 과정에서 많은 걸 배웠다. 폴링, 웹소켓, stomp, 더 나은 객체지향을 위한 개발자의 태도까지 사람은 항상 겸손해야 하며 점진적으로 더 나은 무언가를 향해 정진해야함을 다시금 되새겼다.
