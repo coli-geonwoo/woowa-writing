@@ -6,9 +6,9 @@
 3차 스프린트 목표로 **실시간 친구 도착 여부를 알 수 있는 기능**을 핵심 기능으로 설정했습니다.
 
 여기서 `실시간 친구의 도착 여부를 알 수 있는 기능`이란 약속 30분 전부터 친구에게 물어보지 않아도 시간 내에 도착할 수 있을지,
-어느정도 걸릴지 등 실시간으로 친구의 위치를 기반으로 도착 예정정보를 제공하는 기능을 일컫습니다.
+어느정도 걸릴지 등 실시간 친구의 위치를 기반으로 도착 예정정보를 제공하는 기능을 일컫습니다.
 
-![img.png](img.png)
+<img src ="./img.png" width = "50%" height ="auto">
 
 즉, 우리는 소비자에게 두 가지 기능을 제공해주고자 했습니다.
 
@@ -34,9 +34,10 @@
 
 ---
 
-### **1) 폴링 활용**
+### **1) 폴링(Polling) 활용**
 
 - 약속 정보 화면 동기화를 위해 **약속 30분 전부터 10초 간격으로 도착 정보를 요청하는 폴링**이 시작됩니다.
+여기서 폴링이란 클라이언트가 짧은 주기로 서버에 요청을 보내어 응답받은 값을 기반으로 화면을 갱신하는 식의 구현을 말합니다.
 
 ![img_1.png](imgs/img_1.png)
 
@@ -56,7 +57,7 @@
 
 ### **2) 도착 예정 시간 측정**
 
-그럼 도착 예정 시간은 어떻게 측정이 될까요? 마찬가지로 도식화를 통해 보겠ㅅ습니다.
+그럼 도착 예정 시간은 어떻게 측정이 될까요? 마찬가지로 도식화를 통해 보겠습니다.
 
 ![img_3.png](imgs/img_3.png)
 - API 호출 건수 절약을 위해 **10분 간격으로 현재 위치로부터 약속 장소까지의 대중교통 소요시간을 갱신**합니다.
@@ -114,9 +115,10 @@ ex) 2분전에 갱신된 소요시간이 10분이라면 8분이 남았다고 반
 
 ## **2-1) API 확정하기**
 
-다음으로 안드로이드 측과 협의하여 API를 확정하였는데요.
+다음으로 안드로이드 측과 협의하여 API를 확정하였습니다.
 
-약속 참여원인 mate에 대한 도착정보 목록 요청이기 떄문에 **POST /v1/meetings/{meetingId}/mates/etas**로 api를 정했습니다.
+약속 참여원인 mate에 대한 도착정보 목록 요청이기 떄문에  
+`POST` `/v1/meetings/{meetingId}/mates/etas`로 api를 정했습니다.
 
 안드로이드에서는 다음 정보를 담아 요청을 주게 됩니다.
 
@@ -142,15 +144,15 @@ ex) 2분전에 갱신된 소요시간이 10분이라면 8분이 남았다고 반
 
 **ex1) 약속 시간 전**
 
-**: LATE\_WARNING(지각 위기) : 약속 시간까지 도착 못할 예정**
+**`LATE\_WARNING(지각 위기)` : 약속 시간까지 도착 못할 예정**
 
-**: ARRIVAL\_SOON(도착 예정) : 약속 시간까지는 도착 가능함**
+**`ARRIVAL\_SOON(도착 예정)` : 약속 시간까지는 도착 가능함**
 
-**: ARRIVED(도착)**
+**`ARRIVED(도착)` : 약속 장소 30m 인로 들어온 상태**
 
-**: MISSING (행방불명) : 위치정보를 추적하지 못함**
+**`MISSING (행방불명)` : 위치정보를 추적하지 못함**
 
-```
+```json
 {
   "ownerNickname" : "카키공주",
 	"mateEtas": [
@@ -180,20 +182,20 @@ ex) 2분전에 갱신된 소요시간이 10분이라면 8분이 남았다고 반
 
 **ex2) 약속 시간 후 : LATE - ARRIVED 로 도착 여부를 판정하게 된다**
 
-```
+```json
 {
   "ownerNickname" : "카키공주",
 	"mateEtas": [
 		{
 			"nickname": "콜리",
-			"status": "LATE"
+			"status": "LATE",
 			"durationMinutes": 30
 		},
 		{
 			"nickname": "올리브",
-			"status": "ARRIVED"
+			"status": "ARRIVED",
 			"durationMinutes": 0
-		},
+		}
 	]
 }
 ```
@@ -203,10 +205,6 @@ ex) 2분전에 갱신된 소요시간이 10분이라면 8분이 남았다고 반
 ---
 
 ## **2-2) 로직 구현하기**
-
-페어와 함께 코드 작성에 들어가기 전에 도착 예정 정보를 판단하는 알고리즘의 전반적인 흐름을 화이트보드에 쭉 정리해보았습니다.
-
-![img_30.png](imgs/img_30.png)
 
 이를 순서도로 다시 도식화하면 다음과 같습니다.
 
@@ -248,7 +246,7 @@ public class DistanceCalculator {
 
 ![img_26.png](imgs/img_26.png)
 
-```
+```java
 public enum EtaStatus {
     ARRIVED,
     ARRIVAL_SOON,
@@ -292,10 +290,10 @@ public enum EtaStatus {
 
 ### **3) 서비스 정책에 따른 조건식을 private method로 만들어주기**
 
-**\-- 도착 정보를 판단하는 로직 : 위경도 직선거리가 300m이내 + 약속시간 전이라면 => 도착**
+**도착 정보를 판단하는 로직은 위경도 직선거리가 300m이내 + 약속시간 전입니다.**
 
 ![img_25.png](imgs/img_25.png)
-```
+```java
      private boolean determineArrived(MateEtaRequest mateEtaRequest, Meeting meeting, LocalDateTime now) {
         LocalDateTime meetingTime = meeting.getMeetingTime().withSecond(0).withNano(0);
         double distance = DistanceCalculator.calculate(
@@ -311,7 +309,7 @@ public enum EtaStatus {
 **\- API를 호출해야 하는지 판단하는 로직 : 최초호출이거나, api를 호출한지 10분이 지났다면 호출해야 합니다.**
 
 ![img_24.png](imgs/img_24.png)
-```
+```java
     private boolean isOdysayCallTime(Eta mateEta) {
         return !mateEta.isModified() || mateEta.differenceMinutesFromLastUpdated() >= ODSAY_CALL_CYCLE_MINUTES;
     }
@@ -325,7 +323,7 @@ public enum EtaStatus {
 
 당시 처음으로 구현한 코드의 모습은 다음과 같습니다. 흐름이 잘 드러나지 않고 메서드의 길이가 매우 긴 모습을 볼 수 있습니다.
 
-```
+```java
     @Transactional
     public MateEtaResponses findAllMateEtas(MateEtaRequest mateEtaRequest, Long meetingId, Member member) {
         //먼저 위치를 보내준 약속 참여원을 가져온다
@@ -363,8 +361,8 @@ public enum EtaStatus {
 
 ### **첫째, 중복 코드가 많았습니다.**
 
-- 시간 선후관계 판단에서 나노초를 제거하는 코드 : withNano(0)
-- 약속 시간이 지났는지 판단하는 코드 : (now.isBefore(meetingTime) || now.isEqual(meetingTime)); 
+- 시간 선후관계 판단에서 나노초를 제거하는 코드 : `withNano(0)`
+- 약속 시간이 지났는지 판단하는 코드 : `(now.isBefore(meetingTime) || now.isEqual(meetingTime))`; 
 
 ### **둘째, 메서드 하나에 너무 많은 책임이 들어있었습니다**
 
@@ -372,7 +370,7 @@ public enum EtaStatus {
 - Eta를 매핑할 때(Eta.from), 파라미터가 4개에 달했다. 
 - findAllMateEtas라는 메서드 명은 단지 쿼리형 메서드의 느낌을 준다. 실제로는 eta의 상태가 변경된다. 
 
-### **셋째, 시키지 않고 물어보는 코드가 많았습니다다.**
+### **셋째, 시키지 않고 물어보는 코드가 많았습니다.**
 
 ```java
     @Transactional
@@ -400,14 +398,14 @@ public enum EtaStatus {
 
 중복되는 로직을 객체가 처리할 수 있도록 크로스 커팅해주었습니다.
 
-### **\- 중복코드1 : 시간 선후관계 판단에서 나노초를 제거하는 코드 : withNano(0)**
+### **\- 중복코드1 : 시간 선후관계 판단에서 나노초를 제거하는 코드 : `withNano(0)`**
 
-시가느이 선후관계 판단에 있어서 나노초의 영향을 제거하고 싶었는데요. 예를 들어 약속 상에서 10시 1나노초와 10시를 동일 시간으로 판단하고 싶었습니다.
+시간의 선후관계 판단에 있어서 나노초의 영향을 제거하고 싶었는데요. 예를 들어 약속 상에서 10시 1나노초와 10시를 동일 시간으로 판단하고 싶었습니다.
 그러나, 이러한 정책이 도입됨으로써 코드 곳곳에 일관성을 위해 나노초를 제거하는 코드인 withNano(0)이 들어가기 시작했습니다.
 
 첫번째 리팩터링으로 이러한 중복코드를 크로스커팅하기 위한 유틸 객체인 TimeUtil 객체를 만들어 나노초 trim 작업을 담당하게 하였습니다.
 
-```
+```java
 public class TimeUtil {
 
     public static LocalDateTime trimSecondsAndNanos(LocalDateTime time) {
@@ -419,14 +417,14 @@ public class TimeUtil {
 
 ---
 
-### **\- 중복 코드2 : 약속 시간이 지났는지 판단하는 코드 : (now.isBefore(meetingTime) || now.isEqual(meetingTime));**
+### **\- 중복 코드2 : 약속 시간이 지났는지 판단하는 코드 : `(now.isBefore(meetingTime) || now.isEqual(meetingTime))`**
 
 친구의 도착예정정보는 약속이 끝났는지를 기반으로 나뉘게 됩니다. 예를 들어 약속이 끝나지 않았다면 지각 위기인 친구는 약속 시간이 지나는 순간 지각으로 처리됩니다.
 이를 위해 약속이 끝났는지를 판단하는 로직이 있어야 했는데요. 기존에는 EtaStatus를 매핑하는 과정에서 코드가 바깥으로 나열되어 있었습니다.
 
-그러나, 약속 시간에 대한 가장 많은 정볼르 가진 meeting에게 약속이 끝났는지 물어보게 하여 조금은 더 객체 지향스러운 코드로 리팩터링해보았습니다.
+그러나, 약속 시간에 대한 가장 많은 정보를 가진 meeting에게 약속이 끝났는지 물어보게 하여 조금은 더 객체 지향스러운 코드로 리팩터링해보았습니다.
 
-```
+```java
 public class Meeting extends BaseEntity { 
     ...
 
@@ -447,9 +445,9 @@ public class Meeting extends BaseEntity {
 
 이를 판단하기 위해서 가장 최근 api를 호출한 시간, 남은 소요시간 등의 정보를 알고 있는 **ETA 객체에게 카운트 다운한 값을 물어보도록 리팩터링**하였습니다.
 
-```
+```java
 public class Eta {
-   .... 중략 ...
+   //.... 중략 ...
 
     public long countDownMinutes() {
         LocalDateTime now = TimeUtil.nowWithTrim();
@@ -468,7 +466,7 @@ public class Eta {
 그 결과 EtaStatus에서 매핑하는 로직이 정말 깔끔하게 빠진 모습을 카키와 체감하여 리팩터링을 진행할 수 있었습니다.
 가장 많은 정보를 가진 객체들에게 메시지를 던져 리팩터링한 코드의 모습은 다음과 같습니다.
 
-```
+```java
 public enum EtaStatus {
 
     MISSING((eta, meeting) -> eta.isMissing()),
@@ -498,7 +496,7 @@ public enum EtaStatus {
 ## **리팩터링2. 두꺼운 메서드 > 메서드 분리**
 
 다음으로 메서드의 길이가 너무 길었다는 문제점인데요.
-**상태 매핑의 흐름을 담은 순서도를 보면 크게 2가지로 흐름이 나뉜다는 점을 알 수 있었습니다..**
+**상태 매핑의 흐름을 담은 순서도를 보면 크게 2가지로 흐름이 나뉜다는 점을 알 수 있었습니다.**
 
 ![img_23.png](imgs/img_23.png)
 
@@ -508,10 +506,10 @@ public enum EtaStatus {
 
 두 메서드를 private method로 분리하여 쿼리용 메서드와 명령형 메서드를 분리해주었습니다.
 
-```
+```java
     @Transactional
     public MateEtaResponsesV2 findAllMateEtas(MateEtaRequest mateEtaRequest, Mate mate) {
-        .....중략...
+        //.....중략...
         
         //1. 나의 ETA 상태 업데이트
         updateMateEta(mateEtaRequest, mateEta, meeting);
